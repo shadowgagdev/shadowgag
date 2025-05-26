@@ -1,0 +1,16 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#4CAF50" stroke="#2E7D32" stroke-width="4"/>
+  
+  <!-- Eye shape -->
+  <ellipse cx="64" cy="64" rx="35" ry="20" fill="white"/>
+  
+  <!-- Pupil -->
+  <circle cx="64" cy="64" r="12" fill="#2E7D32"/>
+  
+  <!-- Highlight -->
+  <circle cx="68" cy="60" r="4" fill="white"/>
+  
+  <!-- Active indicator (small green dot) -->
+  <circle cx="90" cy="38" r="8" fill="#8BC34A" stroke="white" stroke-width="2"/>
+</svg> 

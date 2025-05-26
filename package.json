@@ -1,0 +1,41 @@
+{
+  "name": "shadowgag",
+  "version": "1.0.0",
+  "description": "A browser extension that detects shadowbanned comments on 9gag by comparing visible comments with API responses",
+  "main": "content.js",
+  "scripts": {
+    "validate": "node build.js",
+    "validate:chrome": "node build-chrome.js",
+    "validate:firefox": "node build-firefox.js",
+    "package": "node build.js --package",
+    "validate:verbose": "node build.js --verbose",
+    "build": "node build.js",
+    "build:chrome": "node build-chrome.js",
+    "build:firefox": "node build-firefox.js",
+    "lint": "echo 'No linting configured yet'",
+    "test": "echo 'No tests configured yet'"
+  },
+  "keywords": [
+    "browser-extension",
+    "9gag",
+    "shadowban",
+    "comment-detection",
+    "chrome-extension",
+    "firefox-addon"
+  ],
+  "author": "ShadowGag Dev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadowgagdev/shadowgag.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shadowgagdev/shadowgag/issues"
+  },
+  "homepage": "https://github.com/shadowgagdev/shadowgag#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+} 

@@ -1,0 +1,106 @@
+name: Build and Release Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Build Chrome extension
+      run: |
+        echo "Building Chrome extension..."
+        node build-chrome.js
+        
+    - name: Build Firefox extension
+      run: |
+        echo "Building Firefox extension..."
+        node build-firefox.js
+        
+    - name: Create distribution packages
+      run: |
+        mkdir -p dist
+        cd chrome && zip -r ../dist/shadowgag-chrome-${{ github.ref_name }}.zip . && cd ..
+        cd firefox && zip -r ../dist/shadowgag-firefox-${{ github.ref_name }}.zip . && cd ..
+        
+    - name: Create source package
+      run: |
+        zip -r dist/shadowgag-source-${{ github.ref_name }}.zip \
+          background.js \
+          chrome/background-chrome.js \
+          firefox/background-firefox.js \
+          content.js \
+          popup.html \
+          popup.js \
+          styles.css \
+          package.json \
+          README.md \
+          LICENSE \
+          CONTRIBUTING.md \
+          SECURITY.md \
+          FUNDING.md \
+          PUBLISHING.md \
+          .gitignore \
+          build.js \
+          build-chrome.js \
+          build-firefox.js \
+          icons/ \
+          chrome/manifest.json \
+          firefox/manifest.json
+          
+    - name: Generate checksums
+      run: |
+        cd dist
+        sha256sum *.zip > checksums.txt
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          dist/shadowgag-chrome-${{ github.ref_name }}.zip
+          dist/shadowgag-firefox-${{ github.ref_name }}.zip
+          dist/shadowgag-source-${{ github.ref_name }}.zip
+          dist/checksums.txt
+        body: |
+          ## ShadowGag ${{ github.ref_name }}
+          
+          Browser extension that detects shadowbanned comments on 9gag.
+          
+          ### Downloads
+          - **Chrome/Edge/Brave**: `shadowgag-chrome-${{ github.ref_name }}.zip`
+          - **Firefox**: `shadowgag-firefox-${{ github.ref_name }}.zip`
+          - **Source Code**: `shadowgag-source-${{ github.ref_name }}.zip`
+          
+          ### Installation
+          1. Download the appropriate zip file for your browser
+          2. Extract the contents
+          3. Load as unpacked extension in developer mode
+          
+          See [README.md](https://github.com/shadowgagdev/shadowgag#installation) for detailed installation instructions.
+          
+          ### Support
+          If you find this extension useful, consider supporting development:
+          - **Ko-fi**: https://ko-fi.com/shadowgag
+          
+          ### Checksums
+          SHA256 checksums are provided in `checksums.txt` for verification.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

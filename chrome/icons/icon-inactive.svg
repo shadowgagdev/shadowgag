@@ -1,0 +1,20 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#757575" stroke="#424242" stroke-width="4"/>
+  
+  <!-- Ghost body -->
+  <path d="M 35 45 Q 35 25 64 25 Q 93 25 93 45 L 93 85 Q 93 95 88 95 Q 83 90 78 95 Q 73 90 68 95 Q 63 90 58 95 Q 53 90 48 95 Q 43 90 38 95 Q 35 95 35 85 Z" fill="white"/>
+  
+  <!-- Eyes -->
+  <circle cx="52" cy="50" r="6" fill="#424242"/>
+  <circle cx="76" cy="50" r="6" fill="#424242"/>
+  
+  <!-- Mouth -->
+  <ellipse cx="64" cy="70" rx="8" ry="4" fill="#424242"/>
+  
+  <!-- Inactive indicator (red X) -->
+  <g transform="translate(85, 33)">
+    <circle r="10" fill="#f44336" stroke="white" stroke-width="2"/>
+    <path d="M -4 -4 L 4 4 M 4 -4 L -4 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg> 

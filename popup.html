@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 380px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      margin: 0;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #333;
+      min-height: 32px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .setting-group {
+      margin-bottom: 20px;
+      padding: 12px;
+      background-color: #2a2a2a;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    
+    .setting-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #fff;
+      font-size: 15px;
+    }
+    
+    .setting-description {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #555;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #4caf50;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+      font-size: 12px;
+      color: #aaa;
+      text-align: center;
+    }
+    
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    
+    .setting-text {
+      flex: 1;
+      margin-right: 12px;
+    }
+    
+    .marking-section {
+      margin-top: 16px;
+    }
+    
+    .marking-title {
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    
+    .marking-option {
+      margin-bottom: 8px;
+    }
+    
+    .marking-option input[type="radio"] {
+      margin-right: 8px;
+    }
+    
+    .marking-option label {
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    
+    .custom-function {
+      margin-top: 8px;
+      margin-left: 20px;
+    }
+    
+    .custom-function textarea {
+      width: 100%;
+      height: 100px;
+      background-color: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 8px;
+      resize: vertical;
+      box-sizing: border-box;
+      line-height: 1.4;
+    }
+    
+    .custom-function textarea:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+    
+    .custom-function-label {
+      display: block;
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+    
+    .function-signature {
+      background-color: #333;
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #4caf50;
+      cursor: help;
+    }
+    
+    .function-signature code {
+      color: #4caf50;
+      background: none;
+      padding: 0;
+      font-size: inherit;
+    }
+    
+    .function-help {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .function-help strong {
+      color: #fff;
+    }
+    
+    .function-examples {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .example-btn {
+      padding: 4px 8px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .example-btn:hover {
+      background-color: #45a049;
+    }
+    
+    .example-btn:active {
+      background-color: #3d8b40;
+    }
+    
+    .custom-options {
+      margin-left: 20px;
+      margin-top: 8px;
+      padding: 8px;
+      background-color: #333;
+      border-radius: 4px;
+      border: 1px solid #555;
+    }
+    
+    .color-option, .text-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .color-option:last-child, .text-option:last-child {
+      margin-bottom: 0;
+    }
+    
+    .color-label, .text-label {
+      font-size: 12px;
+      color: #ccc;
+      margin-right: 8px;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    
+    .color-option input[type="text"] {
+      width: 120px;
+      height: 24px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      cursor: text;
+      padding: 2px 6px;
+      transition: border-color 0.2s;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .color-option input[type="text"]:hover {
+      border-color: #4caf50;
+    }
+    
+    .color-option input[type="text"]:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      outline: none;
+    }
+    
+    .color-option input[type="text"]:invalid {
+      border-color: #ff6b6b;
+    }
+    
+    .color-picker-note {
+      font-size: 10px;
+      color: #888;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    
+    .text-option input[type="text"] {
+      flex: 1;
+      padding: 7px 8px 5px 8px;
+      background-color: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+      font-family: inherit;
+      height: 24px;
+      line-height: 1;
+    }
+    
+    .text-option input[type="text"]:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+    
+    .color-group {
+      margin-bottom: 12px;
+    }
+    
+    .color-group-label {
+      font-size: 12px;
+      color: #ccc;
+      margin-bottom: 6px;
+      display: block;
+    }
+    
+    .color-inputs {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    
+    .rgba-container {
+      display: flex;
+      margin: 0;
+      padding: 0;
+      border: none;
+      gap: 0;
+    }
+    
+    .color-section-label {
+      font-size: 10px;
+      color: #aaa;
+      font-weight: 500;
+      text-transform: uppercase;
+      margin-right: 2px;
+    }
+    
+    .rgba-input {
+      width: 36px;
+      height: 24px;
+      border: 1px solid #555;
+      border-radius: 0;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      text-align: center;
+      padding: 3px 1px 1px 1px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      box-sizing: border-box;
+      float: none;
+      line-height: 1;
+      -moz-appearance: textfield; /* Firefox */
+    }
+    
+    /* Hide number input arrows/spinners in WebKit browsers */
+    .rgba-input::-webkit-outer-spin-button,
+    .rgba-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .rgba-input:first-of-type {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .rgba-input:nth-of-type(4) {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+      margin-right: 4px;
+    }
+    
+    .rgba-input:not(:first-of-type) {
+      border-left: none;
+      margin-left: 0;
+    }
+    
+    .rgba-input:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      outline: none;
+      z-index: 1;
+      position: relative;
+    }
+    
+    .hex-input {
+      width: 76px;
+      height: 24px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      text-align: center;
+      padding: 3px 3px 1px 3px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      vertical-align: top;
+      box-sizing: border-box;
+      line-height: 1;
+    }
+    
+    .hex-input:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      outline: none;
+    }
+    
+    .hex-input:invalid {
+      border-color: #ff6b6b;
+    }
+    
+    /* Performance Settings Styles */
+    .performance-section {
+      margin-top: 12px;
+    }
+    
+    .performance-select {
+      background-color: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #e0e0e0;
+      padding: 6px 8px;
+      font-size: 12px;
+      min-width: 140px;
+      cursor: pointer;
+    }
+    
+    .performance-select:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+    
+    .performance-select option {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    
+    .advanced-setting {
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: #333;
+      border-radius: 6px;
+      border: 1px solid #555;
+    }
+    
+    .advanced-setting:last-child {
+      margin-bottom: 0;
+    }
+    
+    .number-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    
+    .number-input-group input[type="number"] {
+      background-color: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #e0e0e0;
+      padding: 7px 8px 5px 8px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      width: 80px;
+      height: 24px;
+      text-align: center;
+      line-height: 1;
+    }
+    
+    .number-input-group input[type="number"]:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+    
+    .number-input-group .unit {
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 500;
+      min-width: 30px;
+    }
+    
+    /* Hide number input arrows/spinners */
+    .number-input-group input[type="number"]::-webkit-outer-spin-button,
+    .number-input-group input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .number-input-group input[type="number"] {
+      -moz-appearance: textfield; /* Firefox */
+    }
+    
+    /* Border width inputs styling */
+    .text-option input[type="number"] {
+      background-color: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #e0e0e0;
+      padding: 3px 8px 1px 8px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      width: 60px;
+      height: 24px;
+      text-align: center;
+      box-sizing: border-box;
+      line-height: 1;
+      -moz-appearance: textfield; /* Firefox */
+    }
+    
+    .text-option input[type="number"]:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+    
+    /* Hide number input arrows/spinners for border width inputs */
+    .text-option input[type="number"]::-webkit-outer-spin-button,
+    .text-option input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ShadowGag Settings</h1>
+  </div>
+  
+  <div class="setting-group">
+    <div class="setting-row">
+      <div class="setting-text">
+        <label class="setting-label">Extension Enabled</label>
+        <div class="setting-description">Enable or disable shadowban detection</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="enabled">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  
+  <div class="setting-group">
+    <label class="setting-label">Visible Comments Marking</label>
+    <div class="setting-description">Choose how to mark comments that are visible to other users</div>
+    
+    <div class="marking-section">
+      <div class="marking-option">
+        <input type="radio" id="visible-none" name="visibleMarking" value="none">
+        <label for="visible-none">No marking</label>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="visible-highlight" name="visibleMarking" value="highlight">
+        <label for="visible-highlight">Highlight</label>
+      </div>
+      <div class="custom-options" id="visible-highlight-options" style="display: none;">
+        <div class="color-group">
+          <label class="color-group-label">Border color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="visible-highlight-border-color-r" min="0" max="255" value="76" class="rgba-input">
+              <input type="number" id="visible-highlight-border-color-g" min="0" max="255" value="175" class="rgba-input">
+              <input type="number" id="visible-highlight-border-color-b" min="0" max="255" value="80" class="rgba-input">
+              <input type="number" id="visible-highlight-border-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="visible-highlight-border-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#4caf50" class="hex-input">
+          </div>
+        </div>
+        <div class="text-option">
+          <label class="text-label">Border width:</label>
+          <input type="number" id="visible-highlight-border-width" value="4" min="1" max="10">
+          <span style="font-size: 11px; color: #aaa; margin-left: 4px;">px</span>
+        </div>
+        <div class="color-group">
+          <label class="color-group-label">Background color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="visible-highlight-bg-color-r" min="0" max="255" value="26" class="rgba-input">
+              <input type="number" id="visible-highlight-bg-color-g" min="0" max="255" value="42" class="rgba-input">
+              <input type="number" id="visible-highlight-bg-color-b" min="0" max="255" value="26" class="rgba-input">
+              <input type="number" id="visible-highlight-bg-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="visible-highlight-bg-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#1a2a1a" class="hex-input">
+          </div>
+        </div>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="visible-border" name="visibleMarking" value="border">
+        <label for="visible-border">Border</label>
+      </div>
+      <div class="custom-options" id="visible-border-options" style="display: none;">
+        <div class="color-group">
+          <label class="color-group-label">Border color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="visible-border-color-r" min="0" max="255" value="76" class="rgba-input">
+              <input type="number" id="visible-border-color-g" min="0" max="255" value="175" class="rgba-input">
+              <input type="number" id="visible-border-color-b" min="0" max="255" value="80" class="rgba-input">
+              <input type="number" id="visible-border-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="visible-border-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#4caf50" class="hex-input">
+          </div>
+        </div>
+        <div class="text-option">
+          <label class="text-label">Border width:</label>
+          <input type="number" id="visible-border-width" value="3" min="1" max="10">
+          <span style="font-size: 11px; color: #aaa; margin-left: 4px;">px</span>
+        </div>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="visible-badge" name="visibleMarking" value="badge">
+        <label for="visible-badge">Text badge</label>
+      </div>
+      <div class="custom-options" id="visible-badge-options" style="display: none;">
+        <div class="text-option">
+          <label class="text-label">Badge text:</label>
+          <input type="text" id="visible-badge-text" value="VISIBLE" maxlength="20">
+        </div>
+        <div class="color-group">
+          <label class="color-group-label">Badge color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="visible-badge-color-r" min="0" max="255" value="76" class="rgba-input">
+              <input type="number" id="visible-badge-color-g" min="0" max="255" value="175" class="rgba-input">
+              <input type="number" id="visible-badge-color-b" min="0" max="255" value="80" class="rgba-input">
+              <input type="number" id="visible-badge-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="visible-badge-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#4caf50" class="hex-input">
+          </div>
+        </div>
+        <div class="color-group">
+          <label class="color-group-label">Text color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="visible-badge-text-color-r" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="visible-badge-text-color-g" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="visible-badge-text-color-b" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="visible-badge-text-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="visible-badge-text-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#ffffff" class="hex-input">
+          </div>
+        </div>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="visible-custom" name="visibleMarking" value="custom">
+        <label for="visible-custom">Custom function</label>
+      </div>
+      <div class="custom-function" id="visible-custom-function" style="display: none;">
+        <label class="custom-function-label">Custom JavaScript function:</label>
+        <div class="function-signature" title="This is the function signature. Your code goes inside the curly braces. The 'element' parameter is the comment DOM element you can modify.">
+          <code>function(element) { /* your code here */ }</code>
+        </div>
+        <div class="function-help">
+          The <strong>element</strong> parameter is the comment DOM element. You can modify its style properties.
+        </div>
+        <textarea id="visible-custom-code" placeholder="// Example - Green left border with subtle background:&#10;element.style.borderLeft = '3px solid #4caf50';&#10;element.style.backgroundColor = '#1a2a1a';&#10;element.style.paddingLeft = '8px';&#10;&#10;// Example - Add custom badge:&#10;const badge = document.createElement('span');&#10;badge.textContent = 'VISIBLE';&#10;badge.style.cssText = 'background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-right: 8px;';&#10;element.querySelector('.ui-comment-header').prepend(badge);"></textarea>
+        <div class="example-buttons">
+          <span style="font-size: 11px; color: #aaa; margin-right: 8px;">Load Example:</span>
+          <button class="example-btn" data-target="visible-custom-code" data-example="highlight">Highlight</button>
+          <button class="example-btn" data-target="visible-custom-code" data-example="border">Border</button>
+          <button class="example-btn" data-target="visible-custom-code" data-example="badge">Text badge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="setting-group">
+    <label class="setting-label">Shadowbanned Comments Marking</label>
+    <div class="setting-description">Choose how to mark comments that appear to be shadowbanned</div>
+    
+    <div class="marking-section">
+      <div class="marking-option">
+        <input type="radio" id="shadowbanned-none" name="shadowbannedMarking" value="none">
+        <label for="shadowbanned-none">No marking</label>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="shadowbanned-highlight" name="shadowbannedMarking" value="highlight">
+        <label for="shadowbanned-highlight">Highlight</label>
+      </div>
+      <div class="custom-options" id="shadowbanned-highlight-options" style="display: none;">
+        <div class="color-group">
+          <label class="color-group-label">Border color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="shadowbanned-highlight-border-color-r" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="shadowbanned-highlight-border-color-g" min="0" max="255" value="107" class="rgba-input">
+              <input type="number" id="shadowbanned-highlight-border-color-b" min="0" max="255" value="107" class="rgba-input">
+              <input type="number" id="shadowbanned-highlight-border-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="shadowbanned-highlight-border-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#ff6b6b" class="hex-input">
+          </div>
+        </div>
+        <div class="text-option">
+          <label class="text-label">Border width:</label>
+          <input type="number" id="shadowbanned-highlight-border-width" value="4" min="1" max="10">
+          <span style="font-size: 11px; color: #aaa; margin-left: 4px;">px</span>
+        </div>
+        <div class="color-group">
+          <label class="color-group-label">Background color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="shadowbanned-highlight-bg-color-r" min="0" max="255" value="42" class="rgba-input">
+              <input type="number" id="shadowbanned-highlight-bg-color-g" min="0" max="255" value="26" class="rgba-input">
+              <input type="number" id="shadowbanned-highlight-bg-color-b" min="0" max="255" value="26" class="rgba-input">
+              <input type="number" id="shadowbanned-highlight-bg-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="shadowbanned-highlight-bg-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#2a1a1a" class="hex-input">
+          </div>
+        </div>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="shadowbanned-border" name="shadowbannedMarking" value="border">
+        <label for="shadowbanned-border">Border</label>
+      </div>
+      <div class="custom-options" id="shadowbanned-border-options" style="display: none;">
+        <div class="color-group">
+          <label class="color-group-label">Border color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="shadowbanned-border-color-r" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="shadowbanned-border-color-g" min="0" max="255" value="107" class="rgba-input">
+              <input type="number" id="shadowbanned-border-color-b" min="0" max="255" value="107" class="rgba-input">
+              <input type="number" id="shadowbanned-border-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="shadowbanned-border-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#ff6b6b" class="hex-input">
+          </div>
+        </div>
+        <div class="text-option">
+          <label class="text-label">Border width:</label>
+          <input type="number" id="shadowbanned-border-width" value="3" min="1" max="10">
+          <span style="font-size: 11px; color: #aaa; margin-left: 4px;">px</span>
+        </div>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="shadowbanned-badge" name="shadowbannedMarking" value="badge">
+        <label for="shadowbanned-badge">Text badge</label>
+      </div>
+      <div class="custom-options" id="shadowbanned-badge-options" style="display: none;">
+        <div class="text-option">
+          <label class="text-label">Badge text:</label>
+          <input type="text" id="shadowbanned-badge-text" value="SHADOWBANNED" maxlength="20">
+        </div>
+        <div class="color-group">
+          <label class="color-group-label">Badge color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="shadowbanned-badge-color-r" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="shadowbanned-badge-color-g" min="0" max="255" value="107" class="rgba-input">
+              <input type="number" id="shadowbanned-badge-color-b" min="0" max="255" value="107" class="rgba-input">
+              <input type="number" id="shadowbanned-badge-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="shadowbanned-badge-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#ff6b6b" class="hex-input">
+          </div>
+        </div>
+        <div class="color-group">
+          <label class="color-group-label">Text color:</label>
+          <div class="color-inputs">
+            <span class="color-section-label">RGBA</span>
+            <div class="rgba-container">
+              <input type="number" id="shadowbanned-badge-text-color-r" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="shadowbanned-badge-text-color-g" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="shadowbanned-badge-text-color-b" min="0" max="255" value="255" class="rgba-input">
+              <input type="number" id="shadowbanned-badge-text-color-a" min="0" max="255" value="255" class="rgba-input">
+            </div>
+            <span class="color-section-label">HEX</span>
+            <input type="text" id="shadowbanned-badge-text-color-hex" pattern="^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" value="#ffffff" class="hex-input">
+          </div>
+        </div>
+      </div>
+      
+      <div class="marking-option">
+        <input type="radio" id="shadowbanned-custom" name="shadowbannedMarking" value="custom">
+        <label for="shadowbanned-custom">Custom function</label>
+      </div>
+      <div class="custom-function" id="shadowbanned-custom-function" style="display: none;">
+        <label class="custom-function-label">Custom JavaScript function:</label>
+        <div class="function-signature" title="This is the function signature. Your code goes inside the curly braces. The 'element' parameter is the comment DOM element you can modify.">
+          <code>function(element) { /* your code here */ }</code>
+        </div>
+        <div class="function-help">
+          The <strong>element</strong> parameter is the comment DOM element. You can modify its style properties.
+        </div>
+        <textarea id="shadowbanned-custom-code" placeholder="// Example - Red border with dimmed appearance:&#10;element.style.borderLeft = '4px solid #ff6b6b';&#10;element.style.backgroundColor = '#2a1a1a';&#10;element.style.opacity = '0.7';&#10;element.style.paddingLeft = '8px';&#10;&#10;// Example - Warning badge with red background:&#10;const badge = document.createElement('span');&#10;badge.textContent = 'SHADOWBANNED';&#10;badge.style.cssText = 'background: #ff6b6b; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-right: 8px;';&#10;element.querySelector('.ui-comment-header').prepend(badge);"></textarea>
+        <div class="example-buttons">
+          <span style="font-size: 11px; color: #aaa; margin-right: 8px;">Load Example:</span>
+          <button class="example-btn" data-target="shadowbanned-custom-code" data-example="highlight">Highlight</button>
+          <button class="example-btn" data-target="shadowbanned-custom-code" data-example="border">Border</button>
+          <button class="example-btn" data-target="shadowbanned-custom-code" data-example="badge">Text badge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="setting-group">
+    <div class="setting-row">
+      <div class="setting-text">
+        <label class="setting-label">Performance Settings</label>
+        <div class="setting-description">Configure extension performance and behavior</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="advanced-performance">
+        <span class="slider"></span>
+      </label>
+      <div style="font-size: 11px; color: #aaa; margin-left: 8px;">Advanced</div>
+    </div>
+    
+    <!-- Simple Performance Settings -->
+    <div id="simple-performance" class="performance-section">
+      <div class="setting-row">
+        <div class="setting-text">
+          <label class="setting-label">Performance Mode</label>
+          <div class="setting-description">Choose between balanced performance or maximum accuracy</div>
+        </div>
+        <select id="performance-mode" class="performance-select">
+          <option value="balanced">Balanced (Recommended)</option>
+          <option value="fast">Fast (Lower accuracy)</option>
+          <option value="accurate">Accurate (Slower)</option>
+        </select>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-text">
+          <label class="setting-label">Auto-refresh Comments</label>
+          <div class="setting-description">Automatically check for new comments periodically</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="auto-refresh-enabled">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <!-- Advanced Performance Settings -->
+    <div id="advanced-performance-settings" class="performance-section" style="display: none;">
+      <div class="advanced-setting">
+        <label class="setting-label">API Request Timeout</label>
+        <div class="setting-description">Maximum time to wait for API responses (milliseconds)</div>
+        <div class="number-input-group">
+          <input type="number" id="api-timeout" min="1000" max="30000" step="1000" value="10000">
+          <span class="unit">ms</span>
+        </div>
+      </div>
+      
+      <div class="advanced-setting">
+        <label class="setting-label">Comment Check Interval</label>
+        <div class="setting-description">How often to check for new comments (seconds)</div>
+        <div class="number-input-group">
+          <input type="number" id="check-interval" min="5" max="300" step="5" value="30">
+          <span class="unit">sec</span>
+        </div>
+      </div>
+      
+      <div class="advanced-setting">
+        <label class="setting-label">Batch Size</label>
+        <div class="setting-description">Number of comments to process at once</div>
+        <div class="number-input-group">
+          <input type="number" id="batch-size" min="1" max="100" step="1" value="10">
+          <span class="unit">comments</span>
+        </div>
+      </div>
+      
+      <div class="advanced-setting">
+        <label class="setting-label">Cache Duration</label>
+        <div class="setting-description">How long to cache comment status (minutes)</div>
+        <div class="number-input-group">
+          <input type="number" id="cache-duration" min="1" max="60" step="1" value="5">
+          <span class="unit">min</span>
+        </div>
+      </div>
+      
+      <div class="advanced-setting">
+        <label class="setting-label">Max Retries</label>
+        <div class="setting-description">Maximum number of retry attempts for failed requests</div>
+        <div class="number-input-group">
+          <input type="number" id="max-retries" min="0" max="10" step="1" value="3">
+          <span class="unit">attempts</span>
+        </div>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-text">
+          <label class="setting-label">Debug Logging</label>
+          <div class="setting-description">Enable detailed console logging for troubleshooting</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="debug-logging">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-text">
+          <label class="setting-label">Aggressive Detection</label>
+          <div class="setting-description">Use more intensive methods to detect shadowbans (may impact performance)</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="aggressive-detection">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Donation Section -->
+  <div class="setting-group donation-section">
+    <div class="setting-row">
+      <div class="setting-text">
+        <label class="setting-label">Support Development</label>
+        <div class="setting-description">Help keep ShadowGag free and updated</div>
+      </div>
+      <button id="donate-btn" class="donate-button">Buy me a beer</button>
+    </div>
+  </div>
+  
+  <div class="footer">
+    Settings are saved automatically and applied immediately
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" class="html-dark">
+<head>
+    <title>Demo Social Media Post - ShadowGag Extension Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280">
+    <style>
+        /* Basic styling for demo page */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #141414;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 12px;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .username {
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .post-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .post-content {
+            margin-bottom: 20px;
+        }
+        
+        .post-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        
+        .post-image {
+            width: 100%;
+            height: 300px;
+            background-color: #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            margin-bottom: 16px;
+        }
+        
+        .comments-section {
+            border-top: 1px solid #333;
+            padding-top: 16px;
+        }
+        
+        .comment {
+            display: flex;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        .comment-content {
+            flex: 1;
+        }
+        
+        .comment-username {
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        
+        .comment-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .comment-time {
+            color: #999;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        
+        /* ShadowGag extension styling examples */
+        .shadowgag-visible {
+            border-left: 4px solid #4caf50;
+            background-color: #1a2a1a;
+            padding-left: 8px;
+        }
+        
+        .shadowgag-shadowbanned {
+            border-left: 4px solid #ff6b6b;
+            background-color: #2a1a1a;
+            opacity: 0.7;
+            padding-left: 8px;
+        }
+        
+        .shadowgag-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .shadowgag-badge.shadowbanned {
+            background: #ff6b6b;
+        }
+        
+        .demo-note {
+            background-color: #333;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0077ff;
+        }
+        
+        .demo-note h3 {
+            margin: 0 0 8px 0;
+            color: #0077ff;
+        }
+        
+        .demo-note p {
+            margin: 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="demo-note">
+            <h3>ShadowGag Extension Demo</h3>
+            <p>This is a demonstration of how the ShadowGag extension marks comments. Green indicates visible comments, red indicates potentially shadowbanned comments.</p>
+        </div>
+        
+        <div class="post-header">
+            <div class="user-avatar"></div>
+            <div class="user-info">
+                <div class="username">DemoUser</div>
+                <div class="post-time">2 hours ago</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <div class="post-title">Sample Social Media Post</div>
+            <div class="post-image">
+                [Demo Image Placeholder]
+            </div>
+        </div>
+        
+        <div class="comments-section">
+            <h4>Comments</h4>
+            
+            <!-- Visible comment example -->
+            <div class="comment shadowgag-visible">
+                <div class="comment-avatar"></div>
+                <div class="comment-content">
+                    <div>
+                        <span class="shadowgag-badge">VISIBLE</span>
+                        <span class="comment-username">User123</span>
+                        <span class="comment-time">1 hour ago</span>
+                    </div>
+                    <div class="comment-text">This is an example of a visible comment that other users can see.</div>
+                </div>
+            </div>
+            
+            <!-- Shadowbanned comment example -->
+            <div class="comment shadowgag-shadowbanned">
+                <div class="comment-avatar"></div>
+                <div class="comment-content">
+                    <div>
+                        <span class="shadowgag-badge shadowbanned">SHADOWBANNED</span>
+                        <span class="comment-username">shadowgag</span>
+                        <span class="comment-time">45 minutes ago</span>
+                    </div>
+                    <div class="comment-text">Check out this extension: https://github.com/shadowgagdev/shadowgag</div>
+                </div>
+            </div>
+            
+            <!-- Another visible comment -->
+            <div class="comment shadowgag-visible">
+                <div class="comment-avatar"></div>
+                <div class="comment-content">
+                    <div>
+                        <span class="shadowgag-badge">VISIBLE</span>
+                        <span class="comment-username">TestUser</span>
+                        <span class="comment-time">30 minutes ago</span>
+                    </div>
+                    <div class="comment-text">Another example of a comment that is visible to everyone.</div>
+                </div>
+            </div>
+            
+            <!-- Regular comment without marking -->
+            <div class="comment">
+                <div class="comment-avatar"></div>
+                <div class="comment-content">
+                    <div>
+                        <span class="comment-username">RegularUser</span>
+                        <span class="comment-time">15 minutes ago</span>
+                    </div>
+                    <div class="comment-text">This comment shows how the page looks without the extension active.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

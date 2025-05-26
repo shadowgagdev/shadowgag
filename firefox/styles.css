@@ -1,0 +1,270 @@
+/* ShadowGag Extension Styles */
+
+/* Comment indicator styles */
+.shadowgag-indicator {
+  display: none !important;
+}
+
+/* Base styles for marked comments */
+.shadowgag-marked {
+  transition: all 0.3s ease;
+}
+
+/* Visible comment badges */
+.shadowgag-visible-badge {
+  display: inline-block !important;
+  background: #4caf50;
+  color: white;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  margin-right: 8px !important;
+  text-transform: uppercase !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  line-height: 1.2 !important;
+  vertical-align: middle !important;
+}
+
+/* Shadowbanned comment badges */
+.shadowgag-shadowbanned-badge {
+  display: inline-block !important;
+  background: #ff6b6b;
+  color: white;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  margin-right: 8px !important;
+  text-transform: uppercase !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  line-height: 1.2 !important;
+  vertical-align: middle !important;
+}
+
+/* Ensure badges work well in dark mode */
+.shadowgag-visible-badge,
+.shadowgag-shadowbanned-badge {
+  opacity: 0.9;
+}
+
+/* Hover effects for badges */
+.shadowgag-visible-badge:hover {
+  opacity: 1;
+  background: #45a049;
+}
+
+.shadowgag-shadowbanned-badge:hover {
+  opacity: 1;
+  background: #ff5252;
+}
+
+/* Ensure proper spacing in comment headers */
+.ui-comment-header .shadowgag-visible-badge,
+.ui-comment-header .shadowgag-shadowbanned-badge {
+  margin-left: 0 !important;
+  margin-right: 8px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Dark mode compatibility for marked comments */
+.shadowgag-marked.shadowgag-visible {
+  /* Ensure visible comments maintain readability in dark mode */
+}
+
+.shadowgag-marked.shadowgag-shadowbanned {
+  /* Ensure shadowbanned comments are clearly distinguishable in dark mode */
+}
+
+/* Subtle border styles that work well in dark mode */
+.shadowgag-marked[style*="border-left"] {
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* Custom function safety - prevent breaking the layout */
+.shadowgag-marked * {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+}
+
+/* Ensure new comment indicators work in dark mode */
+.shadowgag-new-comment-indicator {
+  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+  color: white !important;
+  border: 1px solid #4CAF50 !important;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3) !important;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .shadowgag-visible-badge,
+  .shadowgag-shadowbanned-badge {
+    font-size: 9px !important;
+    padding: 1px 4px !important;
+    margin-right: 6px !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .shadowgag-visible-badge {
+    background: #2e7d32;
+    border: 1px solid #1b5e20 !important;
+  }
+  
+  .shadowgag-shadowbanned-badge {
+    background: #d32f2f;
+    border: 1px solid #b71c1c !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .shadowgag-marked {
+    transition: none !important;
+  }
+}
+
+/* Print styles - hide indicators when printing */
+@media print {
+  .shadowgag-visible-badge,
+  .shadowgag-shadowbanned-badge,
+  .shadowgag-new-comment-indicator {
+    display: none !important;
+  }
+  
+  .shadowgag-marked {
+    border: none !important;
+    background: transparent !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Target comment highlighting (for direct comment URLs) */
+.shadowgag-target-comment {
+  border: 2px solid #4caf50 !important;
+  border-radius: 8px !important;
+  background-color: rgba(76, 175, 80, 0.1) !important;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3) !important;
+  animation: shadowgag-highlight 3s ease-in-out;
+}
+
+@keyframes shadowgag-highlight {
+  0% { background-color: rgba(76, 175, 80, 0.3); }
+  50% { background-color: rgba(76, 175, 80, 0.1); }
+  100% { background-color: rgba(76, 175, 80, 0.1); }
+}
+
+/* Loading indicator */
+.shadowgag-loading {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 8px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  background-color: #f0f0f0;
+  color: #666;
+  border: 1px solid #ccc;
+}
+
+.shadowgag-loading::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  border: 2px solid #666;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: shadowgag-spin 1s linear infinite;
+}
+
+@keyframes shadowgag-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error indicator */
+.shadowgag-error {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 8px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .shadowgag-loading {
+    background-color: #333;
+    color: #ccc;
+    border-color: #555;
+  }
+  
+  .shadowgag-error {
+    background-color: #3d3d1a;
+    color: #ffeb3b;
+    border-color: #ffc107;
+  }
+}
+
+/* New comment indicators */
+.shadowgag-new-comment-indicator {
+  animation: shadowgag-new-comment-pulse 2s ease-in-out infinite;
+}
+
+@keyframes shadowgag-new-comment-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.shadowgag-new-comment-indicator:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.5) !important;
+  transition: all 0.2s ease;
+}
+
+/* Special styling for comments that are newly created */
+.shadowgag-new-comment {
+  position: relative;
+}
+
+.shadowgag-new-comment::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #4CAF50, transparent, #4CAF50);
+  border-radius: 8px;
+  z-index: -1;
+  opacity: 0.1;
+  animation: shadowgag-new-comment-glow 3s ease-in-out infinite;
+}
+
+@keyframes shadowgag-new-comment-glow {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+} 
