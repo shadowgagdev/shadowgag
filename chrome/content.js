@@ -1,24 +1,255 @@
 // ShadowGag - 9gag Shadowban Checker Content Script
 
-// Debug logging system
-const DEBUG_MODE = false; // Set to false for production
-const debugLog = (...args) => {
-  if (DEBUG_MODE) {
-    console.log('ShadowGag:', ...args);
-  }
+// Debug configuration - can be controlled via settings
+const DEBUG_CONFIG = {
+  ENABLED: true, // Set to false in production
+  LEVELS: {
+    ERROR: 0,
+    WARN: 1, 
+    INFO: 2,
+    DEBUG: 3,
+    TRACE: 4
+  },
+  CURRENT_LEVEL: 1 // WARN level by default for production
 };
-const debugError = (...args) => {
-  if (DEBUG_MODE) {
-    console.error('ShadowGag:', ...args);
-  }
-};
-const debugWarn = (...args) => {
-  if (DEBUG_MODE) {
-    console.warn('ShadowGag:', ...args);
+
+// Optimized logging functions
+const log = {
+  error: (...args) => {
+    if (DEBUG_CONFIG.ENABLED && DEBUG_CONFIG.CURRENT_LEVEL >= DEBUG_CONFIG.LEVELS.ERROR) {
+      console.error('ShadowGag:', ...args);
+    }
+  },
+  warn: (...args) => {
+    if (DEBUG_CONFIG.ENABLED && DEBUG_CONFIG.CURRENT_LEVEL >= DEBUG_CONFIG.LEVELS.WARN) {
+      console.warn('ShadowGag:', ...args);
+    }
+  },
+  info: (...args) => {
+    if (DEBUG_CONFIG.ENABLED && DEBUG_CONFIG.CURRENT_LEVEL >= DEBUG_CONFIG.LEVELS.INFO) {
+      console.log('ShadowGag:', ...args);
+    }
+  },
+  debug: (...args) => {
+    if (DEBUG_CONFIG.ENABLED && DEBUG_CONFIG.CURRENT_LEVEL >= DEBUG_CONFIG.LEVELS.DEBUG) {
+      console.log('ShadowGag:', ...args);
+    }
+  },
+  trace: (...args) => {
+    if (DEBUG_CONFIG.ENABLED && DEBUG_CONFIG.CURRENT_LEVEL >= DEBUG_CONFIG.LEVELS.TRACE) {
+      console.log('ShadowGag:', ...args);
+    }
   }
 };
 
+// Legacy debug functions for backward compatibility (will be phased out)
+const debugLog = (...args) => {
+  log.debug(...args);
+};
+
+const debugError = (...args) => {
+  log.error(...args);
+};
+
+const debugWarn = (...args) => {
+  log.warn(...args);
+};
+
 debugLog('Content script loaded on:', window.location.href);
+
+// URL Change Detection System - for handling navigation through notifications
+class URLChangeDetector {
+    constructor() {
+        console.log('ShadowGag: URLChangeDetector constructor starting...');
+        this.currentURL = window.location.href;
+        this.currentHash = window.location.hash;
+        this.listeners = [];
+        this.isMonitoring = false;
+        this.lastHashChangeTime = null;
+        this.pendingEvents = []; // Queue events until listeners are ready
+        
+        console.log('ShadowGag: URLChangeDetector initialized');
+    }
+
+    startMonitoring() {
+        if (this.isMonitoring) {
+            console.log('ShadowGag: URLChangeDetector already monitoring');
+            return;
+        }
+
+        console.log('ShadowGag: Starting URL change monitoring');
+        this.isMonitoring = true;
+
+        // Check if we loaded directly with a comment hash (notification navigation)
+        const currentHash = window.location.hash;
+        console.log('ShadowGag: URLChangeDetector checking initial hash:', currentHash);
+        if (currentHash.includes('cs_comment_id=')) {
+            console.log('ShadowGag: Page loaded with comment hash, triggering immediate processing');
+            const targetCommentId = this.extractCommentIdFromHash(currentHash);
+            console.log('ShadowGag: Extracted target comment ID:', targetCommentId);
+            // Delay slightly to ensure DOM is ready
+            setTimeout(() => {
+                console.log('ShadowGag: Triggering comment navigation for initial load');
+                this.notifyURLChange('comment_navigation', {
+                    oldHash: '',
+                    newHash: currentHash,
+                    targetCommentId: targetCommentId,
+                    isInitialLoad: true
+                });
+            }, 100);
+        } else {
+            console.log('ShadowGag: No comment hash in initial URL');
+        }
+
+        // Listen for hash changes (navigation to specific comments)
+        window.addEventListener('hashchange', this.handleHashChange.bind(this));
+        
+        // Listen for popstate events (back/forward navigation)
+        window.addEventListener('popstate', this.handlePopState.bind(this));
+        
+        // Periodically check for URL changes (fallback)
+        this.urlCheckInterval = setInterval(() => {
+            this.checkForURLChange();
+        }, 1000);
+    }
+
+    stopMonitoring() {
+        if (!this.isMonitoring) {
+            return;
+        }
+
+        console.log('ShadowGag: Stopping URL change monitoring');
+        this.isMonitoring = false;
+
+        window.removeEventListener('hashchange', this.handleHashChange.bind(this));
+        window.removeEventListener('popstate', this.handlePopState.bind(this));
+        
+        if (this.urlCheckInterval) {
+            clearInterval(this.urlCheckInterval);
+            this.urlCheckInterval = null;
+        }
+    }
+
+    handleHashChange(event) {
+        console.log('ShadowGag: Hash change detected:', event.oldURL, '->', event.newURL);
+        this.lastHashChangeTime = Date.now();
+        
+        const oldHash = new URL(event.oldURL).hash;
+        const newHash = new URL(event.newURL).hash;
+        
+        const oldCommentId = this.extractCommentIdFromHash(oldHash);
+        const newCommentId = this.extractCommentIdFromHash(newHash);
+        
+        // Check if this is navigation to a specific comment
+        if (newCommentId) {
+            console.log('ShadowGag: Navigation to specific comment detected:', newCommentId);
+            this.notifyURLChange('comment_navigation', {
+                oldHash,
+                newHash,
+                oldCommentId,
+                targetCommentId: newCommentId,
+                isHashChange: true
+            });
+        } else if (oldCommentId && !newCommentId) {
+            console.log('ShadowGag: Navigation away from specific comment');
+            this.notifyURLChange('hash_change', {
+                oldHash,
+                newHash,
+                oldCommentId,
+                targetCommentId: null
+            });
+        }
+    }
+
+    handlePopState(event) {
+        console.log('ShadowGag: Popstate event detected');
+        this.checkForURLChange();
+    }
+
+    checkForURLChange() {
+        const newURL = window.location.href;
+        const newHash = window.location.hash;
+        
+        if (newURL !== this.currentURL || newHash !== this.currentHash) {
+            console.log('ShadowGag: URL change detected:', this.currentURL, '->', newURL);
+            
+            const changeType = this.determineChangeType(this.currentURL, newURL, this.currentHash, newHash);
+            
+            this.notifyURLChange(changeType, {
+                oldURL: this.currentURL,
+                newURL: newURL,
+                oldHash: this.currentHash,
+                newHash: newHash,
+                targetCommentId: this.extractCommentIdFromHash(newHash)
+            });
+            
+            this.currentURL = newURL;
+            this.currentHash = newHash;
+        }
+    }
+
+    determineChangeType(oldURL, newURL, oldHash, newHash) {
+        // Check if this is navigation to a specific comment
+        if (newHash.includes('cs_comment_id=')) {
+            return 'comment_navigation';
+        }
+        
+        // Check if this is a page change
+        const oldPath = new URL(oldURL).pathname;
+        const newPath = new URL(newURL).pathname;
+        if (oldPath !== newPath) {
+            return 'page_change';
+        }
+        
+        // Hash change only
+        if (oldHash !== newHash) {
+            return 'hash_change';
+        }
+        
+        return 'url_change';
+    }
+
+    extractCommentIdFromHash(hash) {
+        const match = hash.match(/cs_comment_id=(c_\d+)/);
+        return match ? match[1] : null;
+    }
+
+    onURLChange(callback) {
+        this.listeners.push(callback);
+        
+        // Process any pending events when the first listener is registered
+        if (this.pendingEvents.length > 0) {
+            console.log('ShadowGag: Processing', this.pendingEvents.length, 'pending URL change events');
+            this.pendingEvents.forEach(event => {
+                try {
+                    callback(event.changeType, event.details);
+                } catch (error) {
+                    console.error('ShadowGag: Error processing pending URL change event:', error);
+                }
+            });
+            this.pendingEvents = []; // Clear pending events
+        }
+    }
+
+    notifyURLChange(changeType, details) {
+        console.log('ShadowGag: Notifying URL change listeners:', changeType, details);
+        
+        if (this.listeners.length === 0) {
+            // No listeners yet, queue the event
+            console.log('ShadowGag: No listeners registered, queuing URL change event');
+            this.pendingEvents.push({ changeType, details });
+            return;
+        }
+        
+        this.listeners.forEach(callback => {
+            try {
+                callback(changeType, details);
+            } catch (error) {
+                console.error('ShadowGag: Error in URL change listener:', error);
+            }
+        });
+    }
+}
 
 // Login Detection System - must be initialized first
 class LoginDetector {
@@ -937,9 +1168,14 @@ class ConfigurationCapture {
     }
     
     extractConfigFromScriptContent(content) {
-        // Add debugging for large scripts
-        if (content.length > 1000) {
-            console.log(`ShadowGag: Analyzing large script (${content.length} chars) for config...`);
+        // Early return if configuration is already complete
+        if (this.appId && this.clientVersion) {
+            return;
+        }
+        
+        // Only log for very large scripts to reduce noise
+        if (content.length > 50000) {
+            log.trace(`Analyzing large script (${content.length} chars) for config...`);
         }
         
         // Look for various JSON patterns
@@ -979,55 +1215,50 @@ class ConfigurationCapture {
             /window\.config\s*=\s*\{[^}]*appId["\s:]+([a-f0-9_]{20,})/gi
         ];
         
-        // Extract appId with enhanced debugging
+        // Extract appId with reduced logging
         if (!this.appId) {
-            console.log('ShadowGag: Searching for appId in script content...');
             for (let i = 0; i < 7; i++) { // Check appId patterns
                 const pattern = patterns[i];
                 const matches = [...content.matchAll(pattern)];
-                if (matches.length > 0) {
-                    console.log(`ShadowGag: Pattern ${i} found ${matches.length} potential appId matches`);
-                }
                 for (const match of matches) {
                     if (match[1] && match[1].length > 10) {
-                        console.log(`ShadowGag: Found potential appId: ${match[1]}`);
                         this.appId = match[1];
-                        console.log('ShadowGag: Captured appId from script content:', this.appId);
+                        log.info('Captured appId from script content:', this.appId);
                         this.notifyListeners();
-                        return; // Exit early once found
+                        break;
                     }
+                }
+                if (this.appId) break;
+            }
+            
+            // Try more aggressive patterns only if still needed
+            if (!this.appId) {
+                for (let i = 14; i < patterns.length; i++) {
+                    const pattern = patterns[i];
+                    const matches = [...content.matchAll(pattern)];
+                    for (const match of matches) {
+                        if (match[1] && match[1].length > 15) {
+                            this.appId = match[1];
+                            log.info('Captured appId from script content (aggressive):', this.appId);
+                            this.notifyListeners();
+                            break;
+                        }
+                    }
+                    if (this.appId) break;
                 }
             }
             
-            // Try more aggressive patterns
-            for (let i = 14; i < patterns.length; i++) {
-                const pattern = patterns[i];
-                const matches = [...content.matchAll(pattern)];
-                if (matches.length > 0) {
-                    console.log(`ShadowGag: Aggressive pattern ${i} found ${matches.length} potential appId matches`);
-                }
-                for (const match of matches) {
-                    if (match[1] && match[1].length > 15) {
-                        console.log(`ShadowGag: Found potential appId (aggressive): ${match[1]}`);
-                        this.appId = match[1];
-                        console.log('ShadowGag: Captured appId from script content (aggressive):', this.appId);
-                        this.notifyListeners();
-                        return; // Exit early once found
-                    }
-                }
-            }
-            
-            // Look for any long hex-like strings that might be appIds
-            const hexStrings = content.match(/[a-f0-9_]{30,}/gi);
-            if (hexStrings && hexStrings.length > 0) {
-                console.log(`ShadowGag: Found ${hexStrings.length} potential hex strings:`, hexStrings.slice(0, 5));
-                for (const hexString of hexStrings) {
-                    if (hexString.startsWith('a_') && hexString.length > 35) {
-                        console.log(`ShadowGag: Found potential appId hex string: ${hexString}`);
-                        this.appId = hexString;
-                        console.log('ShadowGag: Captured appId from hex string:', this.appId);
-                        this.notifyListeners();
-                        return;
+            // Look for hex strings only as last resort
+            if (!this.appId) {
+                const hexStrings = content.match(/[a-f0-9_]{30,}/gi);
+                if (hexStrings && hexStrings.length > 0) {
+                    for (const hexString of hexStrings) {
+                        if (hexString.startsWith('a_') && hexString.length > 35) {
+                            this.appId = hexString;
+                            log.info('Captured appId from hex string:', this.appId);
+                            this.notifyListeners();
+                            break;
+                        }
                     }
                 }
             }
@@ -1035,13 +1266,9 @@ class ConfigurationCapture {
         
         // Extract version with better validation
         if (!this.clientVersion) {
-            console.log('ShadowGag: Searching for version in script content...');
             for (let i = 7; i < 13; i++) { // Check version patterns
                 const pattern = patterns[i];
                 const matches = [...content.matchAll(pattern)];
-                if (matches.length > 0) {
-                    console.log(`ShadowGag: Version pattern ${i} found ${matches.length} matches`);
-                }
                 for (const match of matches) {
                     if (match[1] && match[1].length > 2) {
                         // Validate that this looks like a real version
@@ -1049,16 +1276,19 @@ class ConfigurationCapture {
                         if (version.match(/\d+\.\d+/) || version.includes('web') || version.length > 5) {
                             // Convert to client version format
                             this.clientVersion = version.includes('/web') ? version : `${version}/web`;
-                            console.log('ShadowGag: Derived client-version from script content:', this.clientVersion);
+                            log.info('Derived client-version from script content:', this.clientVersion);
                             this.notifyListeners();
                             break;
-                        } else {
-                            console.log(`ShadowGag: Rejected version candidate: ${version} (too simple)`);
                         }
                     }
                 }
                 if (this.clientVersion) break;
             }
+        }
+        
+        // Early return if configuration is now complete
+        if (this.appId && this.clientVersion) {
+            return;
         }
         
         // Extract from commentOptions
@@ -1069,7 +1299,7 @@ class ConfigurationCapture {
                 for (const match of matches) {
                     if (match[1] && match[1].length > 10) {
                         this.appId = match[1];
-                        console.log('ShadowGag: Captured appId from script commentOptions:', this.appId);
+                        log.info('Captured appId from script commentOptions:', this.appId);
                         this.notifyListeners();
                         return;
                     }
@@ -1077,12 +1307,14 @@ class ConfigurationCapture {
             }
         }
         
-        // Try to extract from large JSON blocks
-        if (!this.appId || !this.clientVersion) {
+        // Try to extract from large JSON blocks only if still needed
+        if ((!this.appId || !this.clientVersion) && content.length > 5000) {
             const jsonBlocks = content.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
             if (jsonBlocks && jsonBlocks.length > 0) {
-                console.log(`ShadowGag: Found ${jsonBlocks.length} JSON blocks to analyze`);
-                for (const block of jsonBlocks) {
+                // Limit JSON block analysis
+                const blocksToAnalyze = Math.min(jsonBlocks.length, 5);
+                for (let i = 0; i < blocksToAnalyze; i++) {
+                    const block = jsonBlocks[i];
                     if (block.length > 100) { // Only analyze substantial JSON blocks
                         try {
                             const parsed = JSON.parse(block);
@@ -1092,19 +1324,6 @@ class ConfigurationCapture {
                             // Not valid JSON, continue
                         }
                     }
-                }
-            }
-        }
-        
-        // Last resort: look for any assignment to variables that might contain config
-        if (!this.appId) {
-            const assignments = content.match(/(?:var|let|const|window\.)\s*\w*[Cc]onfig\w*\s*=\s*\{[^}]+\}/g);
-            if (assignments) {
-                console.log(`ShadowGag: Found ${assignments.length} config-like assignments`);
-                for (const assignment of assignments) {
-                    console.log('ShadowGag: Analyzing config assignment:', assignment.substring(0, 200));
-                    this.extractConfigFromScriptContent(assignment);
-                    if (this.appId) break;
                 }
             }
         }
@@ -1571,9 +1790,99 @@ class ShadowGagChecker {
     
     this.mutationObserver = null;
     
+    // Register URL change listener immediately to catch notification navigation
+    this.registerURLChangeListener();
+    
     console.log('ShadowGag: ShadowGagChecker properties initialized, calling init...');
     this.init();
     console.log('ShadowGag: ShadowGagChecker constructor completed');
+  }
+
+  // Register URL change listener immediately to catch notification navigation
+  registerURLChangeListener() {
+    log.debug('Registering URL change listener immediately...');
+    
+    window.shadowGagURLDetector.onURLChange(async (changeType, details) => {
+      log.info('URL change detected:', changeType, details);
+      
+      // Handle comment navigation
+      if (changeType === 'comment_navigation' && details.targetCommentId) {
+        log.info('Navigation to specific comment detected:', details.targetCommentId);
+        
+        // Update our target comment ID
+        this.targetCommentId = details.targetCommentId;
+        
+        // Extract new post key and check for post changes
+        const newPostKey = this.extractPostKey();
+        const postChanged = newPostKey && newPostKey !== this.postKey;
+        
+        if (postChanged) {
+          log.info(`Post changed during comment navigation from ${this.postKey} to ${newPostKey}`);
+          this.postKey = newPostKey;
+          
+          // Clear caches and remove old indicators
+          this.processedComments.clear();
+          this.commentCache.clear();
+          this.allTopLevelComments.clear();
+          this.allRepliesCache.clear();
+          this.loadedReplyThreads.clear();
+          this.removeAllIndicators();
+        }
+        
+        // Re-identify page type
+        this.identifyPageType();
+        
+        // Ensure current user is detected before processing
+        if (!this.currentUser) {
+          log.debug('Current user not detected, attempting detection...');
+          
+          // Try to get current user from login detector
+          this.currentUser = window.shadowGagLoginDetector.getCurrentUser();
+          
+          if (!this.currentUser) {
+            log.debug('Starting login monitoring for user detection...');
+            // Start login monitoring if not already started
+            window.shadowGagLoginDetector.startMonitoring();
+            
+            // Wait briefly for user detection
+            await new Promise(resolve => setTimeout(resolve, 500));
+            this.currentUser = window.shadowGagLoginDetector.getCurrentUser();
+          }
+        }
+        
+        if (!this.currentUser) {
+          log.warn('Cannot process comment - user not logged in or not detected');
+          return;
+        }
+        
+        log.info('Current user detected:', this.currentUser);
+        
+        // Schedule delayed processing for the target comment
+        this.scheduleDelayedCommentProcessing(details.targetCommentId, details.isInitialLoad);
+      }
+      
+      // Handle other navigation types
+      else if (changeType === 'page_change') {
+        log.info('Page navigation detected, reinitializing...');
+        
+        // Clear current state
+        this.processedComments.clear();
+        this.commentCache.clear();
+        this.removeAllIndicators();
+        
+        // Re-extract post key
+        const newPostKey = this.extractPostKey();
+        if (newPostKey && newPostKey !== this.postKey) {
+          this.postKey = newPostKey;
+          log.info('New post key:', this.postKey);
+          
+          // Restart processing for new page
+          setTimeout(() => {
+            this.checkExistingComments();
+          }, 1000);
+        }
+      }
+    });
   }
 
   async init() {
@@ -1732,12 +2041,22 @@ class ShadowGagChecker {
     // Check if we're on a post page
     if (!this.isPostPage()) {
       console.log('ShadowGag: Not on a post page, skipping');
+      console.log('ShadowGag: Current URL:', window.location.href);
+      console.log('ShadowGag: Current pathname:', window.location.pathname);
       return;
     }
     
     // Step 1: Identify current user using login detector
     this.currentUser = window.shadowGagLoginDetector.getCurrentUser();
     console.log('ShadowGag: Current user from login detector:', this.currentUser);
+    
+    if (!this.currentUser) {
+      console.log('ShadowGag: No user logged in, checking login detector state...');
+      console.log('ShadowGag: Login detector initialized:', !!window.shadowGagLoginDetector);
+      // Try to get user info directly
+      const authCookies = window.shadowGagLoginDetector.getAuthCookies();
+      console.log('ShadowGag: Auth cookies found:', !!authCookies);
+    }
     
     // Set up login change listener
     window.shadowGagLoginDetector.onUserChange((newUser) => {
@@ -1797,7 +2116,14 @@ class ShadowGagChecker {
     // Step 4: Check existing comments
     await this.checkExistingComments();
     
-    // Step 5: Set up mutation observer for new comments
+    // Step 5: If we have a target comment ID (from notification navigation), 
+    // schedule additional processing to catch dynamically loaded content
+    if (this.targetCommentId) {
+      console.log('ShadowGag: Target comment detected, scheduling delayed processing');
+      this.scheduleDelayedCommentProcessing(this.targetCommentId);
+    }
+    
+    // Step 6: Set up mutation observer for new comments
     this.setupMutationObserver();
     
     console.log('ShadowGag: ShadowGag checker started successfully');
@@ -2218,10 +2544,18 @@ class ShadowGagChecker {
     
     // Find all comment elements
     const commentElements = this.findAllComments();
+    console.log('ShadowGag: Found', commentElements.length, 'comment elements in DOM');
     
+    if (commentElements.length === 0) {
+      console.log('ShadowGag: No comment elements found - page may not be fully loaded yet');
+      return;
+    }
+
     for (const commentElement of commentElements) {
       await this.processComment(commentElement);
     }
+    
+    console.log('ShadowGag: Finished checking existing comments');
   }
 
   // OPTIMIZATION: Quick scan to identify user comments without visibility marking
@@ -2272,23 +2606,24 @@ class ShadowGagChecker {
     // Extract comment ID
     const commentId = this.extractCommentId(commentElement);
     if (!commentId) {
-      console.log('ShadowGag: Could not extract comment ID');
+      log.warn('Could not extract comment ID from element');
       return;
     }
 
     // Skip if already processed
     if (this.processedComments.has(commentId)) {
+      log.trace('Comment already processed:', commentId);
       return;
     }
 
-    console.log('ShadowGag: Processing comment:', commentId, 'by', username);
+    log.info('Processing user comment:', commentId);
     
     // If this is a reply, ensure we have loaded the full reply thread
     const isReply = commentElement.classList.contains('comment-item--child');
     if (isReply) {
       const parentCommentId = this.findParentCommentId(commentElement);
       if (parentCommentId && !this.loadedReplyThreads.has(parentCommentId)) {
-        console.log('ShadowGag: Loading reply thread for parent:', parentCommentId);
+        log.debug('Loading reply thread for parent:', parentCommentId);
         await this.loadAllRepliesForComment(parentCommentId);
       }
     }
@@ -2703,32 +3038,106 @@ class ShadowGagChecker {
       return;
     }
     
-    console.log('ShadowGag: Setting up mutation observer');
+    console.log('ShadowGag: Setting up enhanced mutation observer');
     this.mutationObserver = new MutationObserver((mutations) => {
       let hasNewComments = false;
+      let hasContentChanges = false;
+      let targetCommentUpdated = false;
       
       mutations.forEach((mutation) => {
+        // Check for new comment elements being added
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             // Check if new comment elements were added
             if (node.classList && node.classList.contains('comment-list-item')) {
               hasNewComments = true;
+              console.log('ShadowGag: New comment element detected');
             } else if (node.querySelector && node.querySelector('.comment-list-item')) {
               hasNewComments = true;
+              console.log('ShadowGag: Container with comment elements detected');
+            }
+            
+            // Check for comment content being populated (text, usernames, etc.)
+            if (node.classList && (
+                node.classList.contains('ui-comment-content') ||
+                node.classList.contains('ui-comment-header') ||
+                node.classList.contains('ui-comment-text')
+              )) {
+              hasContentChanges = true;
+              console.log('ShadowGag: Comment content element detected');
+            }
+            
+            // Check if this is our target comment being loaded
+            if (this.targetCommentId && node.querySelector) {
+              const targetElement = node.querySelector(`[data-comment-id="${this.targetCommentId}"]`) ||
+                                   node.querySelector(`[id*="${this.targetCommentId}"]`);
+              if (targetElement) {
+                targetCommentUpdated = true;
+                console.log('ShadowGag: Target comment element detected:', this.targetCommentId);
+              }
             }
           }
         });
+        
+        // Check for attribute changes that might indicate content loading
+        if (mutation.type === 'attributes') {
+          const target = mutation.target;
+          
+          // Check if comment content attributes changed
+          if (target.classList && target.classList.contains('comment-list-item')) {
+            hasContentChanges = true;
+            console.log('ShadowGag: Comment element attributes changed');
+          }
+          
+          // Check if this is our target comment
+          if (this.targetCommentId && (
+              target.getAttribute('data-comment-id') === this.targetCommentId ||
+              target.id && target.id.includes(this.targetCommentId)
+            )) {
+            targetCommentUpdated = true;
+            console.log('ShadowGag: Target comment attributes updated:', this.targetCommentId);
+          }
+        }
+        
+        // Check for text content changes (comment text being loaded)
+        if (mutation.type === 'childList' && mutation.target.classList) {
+          if (mutation.target.classList.contains('ui-comment-text') ||
+              mutation.target.classList.contains('ui-comment-content')) {
+            hasContentChanges = true;
+            console.log('ShadowGag: Comment text content changed');
+          }
+        }
       });
       
-      if (hasNewComments && this.isEnabled) {
-        console.log('ShadowGag: New comments detected via mutation observer');
-        setTimeout(() => this.checkExistingComments(), SHADOWGAG_CONFIG.TIMING.MUTATION_OBSERVER_DELAY);
+      // Process changes if extension is enabled
+      if (this.isEnabled) {
+        // If target comment was updated, process it immediately
+        if (targetCommentUpdated) {
+          console.log('ShadowGag: Target comment updated, processing immediately');
+          setTimeout(async () => {
+            const targetElement = this.findCommentElementById(this.targetCommentId);
+            if (targetElement) {
+              await this.processComment(targetElement);
+            }
+            // Also do a broader check
+            await this.checkExistingComments();
+          }, 100); // Quick response for target comment
+        }
+        // If new comments or content changes detected
+        else if (hasNewComments || hasContentChanges) {
+          console.log('ShadowGag: Content changes detected via mutation observer');
+          setTimeout(() => this.checkExistingComments(), SHADOWGAG_CONFIG.TIMING.MUTATION_OBSERVER_DELAY);
+        }
       }
     });
 
+    // Enhanced observation options to catch more changes
     this.mutationObserver.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-comment-id', 'id', 'class'],
+      characterData: true // Also observe text changes
     });
   }
 
@@ -2860,7 +3269,20 @@ class ShadowGagChecker {
 
   // Find comment element by comment ID
   findCommentElementById(commentId) {
-    // Try different selectors that might contain the comment ID
+    log.trace('Searching for comment element with ID:', commentId);
+    
+    // First, try the same approach as findAllComments() and extractCommentId()
+    const allComments = document.querySelectorAll('.comment-list-item .comment-item');
+    
+    for (const commentElement of allComments) {
+      const extractedId = this.extractCommentId(commentElement);
+      if (extractedId === commentId) {
+        log.trace('Found comment element using extractCommentId approach');
+        return commentElement;
+      }
+    }
+    
+    // Fallback: Try different selectors that might contain the comment ID
     const selectors = [
       `[data-comment-id="${commentId}"]`,
       `[id*="${commentId}"]`,
@@ -2871,25 +3293,26 @@ class ShadowGagChecker {
     for (const selector of selectors) {
       const element = document.querySelector(selector);
       if (element) {
-        console.log('ShadowGag: Found comment element using selector:', selector);
+        log.trace('Found comment element using selector:', selector);
         return element;
       }
     }
 
     // If direct selectors don't work, search through all comment elements
-    const allComments = document.querySelectorAll('.comment, [class*="comment"], [data-comment-id]');
-    for (const comment of allComments) {
+    const allCommentElements = document.querySelectorAll('.comment, [class*="comment"], [data-comment-id]');
+    for (const comment of allCommentElements) {
       // Check various attributes and text content for the comment ID
       const attributes = ['data-comment-id', 'id', 'data-id', 'class'];
       for (const attr of attributes) {
         const value = comment.getAttribute(attr);
         if (value && value.includes(commentId)) {
-          console.log('ShadowGag: Found comment element by attribute search:', attr, value);
+          log.trace('Found comment element by attribute search:', attr);
           return comment;
         }
       }
     }
 
+    log.debug('Comment element not found for ID:', commentId);
     return null;
   }
 
@@ -3157,6 +3580,61 @@ class ShadowGagChecker {
       }, 5000); // Increased timeout to 5 seconds
     });
   }
+
+  // Schedule delayed comment processing for notification navigation
+  scheduleDelayedCommentProcessing(targetCommentId, isInitialLoad = false) {
+    log.info('Scheduling delayed processing for target comment:', targetCommentId, 'isInitialLoad:', isInitialLoad);
+    
+    // Use extended delays for initial loads (notification navigation)
+    const delays = isInitialLoad 
+      ? [200, 500, 1000, 2000, 3000, 5000, 8000] // Extended delays for initial loads
+      : [500, 1000, 2000, 3000, 5000]; // Standard delays for hash changes
+    
+    let processedSuccessfully = false;
+    
+    delays.forEach((delay, index) => {
+      setTimeout(async () => {
+        // Skip if already processed successfully
+        if (processedSuccessfully) {
+          log.trace(`Skipping delayed processing attempt ${index + 1}/${delays.length} - already processed successfully`);
+          return;
+        }
+        
+        log.debug(`Delayed processing attempt ${index + 1}/${delays.length} for comment:`, targetCommentId);
+        
+        // Check if the target comment is now in the DOM
+        const targetElement = this.findCommentElementById(targetCommentId);
+        if (targetElement) {
+          log.debug('Target comment found in DOM, processing immediately');
+          
+          // Check if already processed
+          if (this.processedComments.has(targetCommentId)) {
+            log.trace('Target comment already processed, stopping delayed processing');
+            processedSuccessfully = true;
+            return;
+          }
+          
+          await this.processComment(targetElement);
+          
+          // Check if processing was successful
+          if (this.processedComments.has(targetCommentId)) {
+            log.info('Target comment processed successfully, stopping delayed processing');
+            processedSuccessfully = true;
+          }
+        } else {
+          log.debug('Target comment not yet in DOM, running full check');
+          // Run a full check to catch any newly loaded comments
+          await this.checkExistingComments();
+          
+          // Check if the target comment was processed during the full check
+          if (this.processedComments.has(targetCommentId)) {
+            log.info('Target comment processed during full check, stopping delayed processing');
+            processedSuccessfully = true;
+          }
+        }
+      }, delay);
+    });
+  }
 }
 
 // Message listener for background script
@@ -3208,6 +3686,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   window.shadowGagInitialized = true;
   
+  // Initialize URLChangeDetector early to catch notification navigation
+  if (!window.shadowGagURLDetector) {
+    console.log('ShadowGag: Initializing URLChangeDetector early...');
+    window.shadowGagURLDetector = new URLChangeDetector();
+    window.shadowGagURLDetector.startMonitoring();
+  }
+  
   // Initialize configuration capture first
   if (!window.shadowGagConfigCapture) {
     window.shadowGagConfigCapture = new ConfigurationCapture();
@@ -3218,13 +3703,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     window.shadowGagLoginDetector = new LoginDetector();
   }
   
-  // Wait a bit for the page to load
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
   try {
-    // Only create if not already exists
+    // Create ShadowGagChecker immediately to register URL change listener
     if (!window.shadowGagChecker) {
-      console.log('ShadowGag: Creating ShadowGagChecker...');
+      console.log('ShadowGag: Creating ShadowGagChecker immediately...');
       const checker = new ShadowGagChecker();
       window.shadowGagChecker = checker;
       console.log('ShadowGag: ShadowGagChecker created successfully');
