@@ -2,16 +2,16 @@
 
 This guide covers everything needed to publish ShadowGag to Chrome Web Store and Firefox Add-ons.
 
-## 📦 Distribution Files
+## Distribution Files
 
 The following files are ready for submission:
 
 - **Chrome Web Store**: `dist/shadowgag-chrome-v1.0.0.zip`
 - **Firefox Add-ons**: `dist/shadowgag-firefox-v1.0.0.zip`
 
-## 🔧 Pre-Submission Checklist
+## Pre-Submission Checklist
 
-### ✅ Technical Requirements
+### Technical Requirements
 - [x] Extension builds successfully for both browsers
 - [x] Manifest files are valid (V3 for Chrome, V2 for Firefox)
 - [x] All required icons included (16x16, 32x32, 48x48, 128x128)
@@ -19,13 +19,13 @@ The following files are ready for submission:
 - [x] Privacy policy information provided
 - [x] No external dependencies or CDN links
 
-### ✅ Content Requirements
+### Content Requirements
 - [x] Clear description of functionality
 - [x] Screenshots prepared (see Screenshots section)
 - [x] Appropriate keywords and categories
-- [x] Version number set (1.0.0)
+- [x] Version number set (1.0.1)
 
-## 🖼️ Screenshots Needed
+## Screenshots Needed
 
 ### For Chrome Web Store (1280x800 or 640x400):
 1. **Main Interface**: Extension popup showing configuration options
@@ -38,7 +38,7 @@ The following files are ready for submission:
 2. **Working Example**: 9gag comments with shadowban detection
 3. **Feature Overview**: Multiple marking styles shown
 
-## 📝 Store Listing Information
+## Store Listing Information
 
 ### Title
 **ShadowGag - Shadowban Comment Detector**
@@ -51,7 +51,7 @@ The following files are ready for submission:
 ```
 ShadowGag helps you identify shadowbanned comments on 9gag by comparing what you see in your browser with what 9gag's API actually returns.
 
-🔍 KEY FEATURES:
+KEY FEATURES:
 • Automatic shadowban detection using API comparison
 • Multiple marking styles for visible and shadowbanned comments
 • Custom JavaScript functions for personalized styling
@@ -59,19 +59,19 @@ ShadowGag helps you identify shadowbanned comments on 9gag by comparing what you
 • Real-time processing of new comments
 • No data collection or tracking
 
-🎨 MARKING OPTIONS:
+MARKING OPTIONS:
 • Visible Comments: Subtle borders, badges, or custom styling
 • Shadowbanned Comments: Red highlights, warning badges, or custom effects
 • Custom Functions: Write your own JavaScript for complete control
 
-🔒 PRIVACY & SECURITY:
+PRIVACY & SECURITY:
 • All processing happens locally in your browser
 • Only reads your username to identify your comments
 • No personal data stored or transmitted
 • No tracking or analytics
 • Open source and transparent
 
-⚙️ HOW IT WORKS:
+HOW IT WORKS:
 1. Detects your 9gag username from the page
 2. Fetches comment data via 9gag's public API
 3. Compares visible comments with API responses
@@ -79,7 +79,10 @@ ShadowGag helps you identify shadowbanned comments on 9gag by comparing what you
 
 Perfect for content creators, moderators, and anyone curious about comment visibility on 9gag.
 
-⚠️ DISCLAIMER:
+SUPPORT:
+If you find this extension useful, consider supporting development at https://ko-fi.com/shadowgag
+
+DISCLAIMER:
 This is an unofficial tool not affiliated with 9gag. Use responsibly and in accordance with 9gag's terms of service.
 ```
 
@@ -96,16 +99,16 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 - **Chrome**: Developer Tools / Productivity
 - **Firefox**: Developer Tools / Social & Communication
 
-## 🌐 Chrome Web Store Submission
+## Chrome Web Store Submission
 
 ### Developer Account Requirements
 - $5 one-time registration fee
-- Valid payment method (see main README for anonymous options)
+- Valid payment method
 - Anonymous developer identity: "ShadowGag Dev"
 
 ### Submission Steps
 1. **Login** to Chrome Web Store Developer Dashboard
-2. **Upload** `dist/shadowgag-chrome-v1.0.0.zip`
+2. **Upload** `dist/shadowgag-chrome-v1.0.1.zip`
 3. **Fill Store Listing**:
    - Title: ShadowGag - Shadowban Comment Detector
    - Description: (use detailed description above)
@@ -124,7 +127,7 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 - `storage`: To save user preferences locally
 - `host permissions for 9gag.com`: To fetch comment data via API
 
-## 🦊 Firefox Add-ons Submission
+## Firefox Add-ons Submission
 
 ### Developer Account Requirements
 - Free Mozilla account
@@ -133,7 +136,7 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 
 ### Submission Steps
 1. **Login** to Firefox Add-on Developer Hub
-2. **Upload** `dist/shadowgag-firefox-v1.0.0.zip`
+2. **Upload** `dist/shadowgag-firefox-v1.0.1.zip`
 3. **Fill Listing Information**:
    - Name: ShadowGag - Shadowban Comment Detector
    - Summary: (use short description)
@@ -149,7 +152,7 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 - **Human Review**: If flagged (can take days/weeks)
 - **Common Issues**: API usage, permissions, content policy
 
-## 📸 Screenshot Guidelines
+## Screenshot Guidelines
 
 ### What to Capture
 1. **Extension Popup**: Clean interface showing all options
@@ -170,7 +173,7 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 - Include the extension icon in browser toolbar
 - Highlight key features with annotations if needed
 
-## 🚀 Post-Publication
+## Post-Publication
 
 ### After Approval
 1. **Update README** with store links
@@ -185,7 +188,7 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 - **Regular Updates**: Bug fixes and feature improvements
 - **Store Compliance**: Keep up with policy changes
 
-## 🔄 Version Updates
+## Version Updates
 
 ### For Future Releases
 1. **Update version** in `package.json`
@@ -206,11 +209,11 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 - Improvement description
 ```
 
-## 📞 Support Information
+## Support Information
 
 ### Contact Methods
 - **GitHub Issues**: Primary support channel
-- **Email**: Your anonymous ProtonMail address
+- **Ko-fi**: https://ko-fi.com/shadowgag
 - **Response Time**: Best effort, no guarantees
 
 ### Common User Issues
@@ -219,7 +222,7 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 3. **Custom functions failing**: JavaScript syntax errors
 4. **Performance issues**: Too many comments on page
 
-## ⚖️ Legal Considerations
+## Legal Considerations
 
 ### Terms of Service
 - Users must comply with 9gag's ToS
@@ -238,6 +241,6 @@ This is an unofficial tool not affiliated with 9gag. Use responsibly and in acco
 
 ---
 
-**Ready to publish!** 🎉
+**Ready to publish!**
 
 Both extension packages are built and ready for submission to their respective stores. 
