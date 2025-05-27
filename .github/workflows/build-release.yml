@@ -32,11 +32,27 @@ jobs:
         echo "Building Firefox extension..."
         node build-firefox.js
         
-    - name: Create distribution packages
+    - name: Install web-ext for Firefox signing
+      run: npm install --global web-ext
+        
+    - name: Sign Firefox extension
       run: |
         mkdir -p dist
-        cd chrome && zip -r ../dist/shadowgag-chrome-${{ github.ref_name }}.zip . && cd ..
+        # Create unsigned ZIP first
         cd firefox && zip -r ../dist/shadowgag-firefox-${{ github.ref_name }}.zip . && cd ..
+        # Sign the extension if API keys are available
+        if [ -n "${{ secrets.AMO_JWT_ISSUER }}" ] && [ -n "${{ secrets.AMO_JWT_SECRET }}" ]; then
+          echo "Signing Firefox extension..."
+          web-ext sign --channel=unlisted --api-key="${{ secrets.AMO_JWT_ISSUER }}" --api-secret="${{ secrets.AMO_JWT_SECRET }}" --source-dir=firefox --artifacts-dir=dist
+          # Rename the signed XPI to a more user-friendly name
+          find dist -name "*.xpi" -exec mv {} dist/shadowgag-firefox-${{ github.ref_name }}-signed.xpi \;
+        else
+          echo "AMO API keys not found - skipping signing. Extension will be unsigned."
+        fi
+        
+    - name: Create Chrome distribution package
+      run: |
+        cd chrome && zip -r ../dist/shadowgag-chrome-${{ github.ref_name }}.zip . && cd ..
         
     - name: Create source package
       run: |
@@ -75,6 +91,7 @@ jobs:
         files: |
           dist/shadowgag-chrome-${{ github.ref_name }}.zip
           dist/shadowgag-firefox-${{ github.ref_name }}.zip
+          dist/shadowgag-firefox-${{ github.ref_name }}-signed.xpi
           dist/shadowgag-source-${{ github.ref_name }}.zip
           dist/checksums.txt
         body: |
@@ -84,13 +101,30 @@ jobs:
           
           ### Downloads
           - **Chrome/Edge/Brave**: `shadowgag-chrome-${{ github.ref_name }}.zip`
-          - **Firefox**: `shadowgag-firefox-${{ github.ref_name }}.zip`
+          - **Firefox (Developer Mode)**: `shadowgag-firefox-${{ github.ref_name }}.zip`
+          - **Firefox (Regular Users)**: `shadowgag-firefox-${{ github.ref_name }}-signed.xpi`
           - **Source Code**: `shadowgag-source-${{ github.ref_name }}.zip`
           
           ### Installation
-          1. Download the appropriate zip file for your browser
+          
+          #### For Regular Firefox Users (Recommended):
+          1. Download `shadowgag-firefox-${{ github.ref_name }}-signed.xpi`
+          2. Open Firefox and go to `about:addons`
+          3. Click the gear icon ⚙️ and select "Install Add-on From File"
+          4. Select the downloaded `.xpi` file
+          5. Click "Add" when prompted
+          
+          #### For Chrome/Edge/Brave Users:
+          1. Download `shadowgag-chrome-${{ github.ref_name }}.zip`
           2. Extract the contents
-          3. Load as unpacked extension in developer mode
+          3. Open browser extensions page and enable "Developer mode"
+          4. Click "Load unpacked" and select the extracted folder
+          
+          #### For Firefox Developers:
+          1. Download `shadowgag-firefox-${{ github.ref_name }}.zip`
+          2. Extract the contents
+          3. Go to `about:debugging` → "This Firefox" → "Load Temporary Add-on"
+          4. Select any file from the extracted folder
           
           See [README.md](https://github.com/shadowgagdev/shadowgag#installation) for detailed installation instructions.
           

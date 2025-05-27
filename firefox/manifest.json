@@ -4,6 +4,12 @@
   "version": "1.0",
   "description": "Detects shadowbanned comments on 9gag",
   
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "shadowgag@shadowgagdev.github.io"
+    }
+  },
+  
   "permissions": [
     "storage",
     "*://*.9gag.com/*",
