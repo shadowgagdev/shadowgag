@@ -8,7 +8,6 @@ A browser extension that detects shadowbanned comments on 9gag by comparing visi
 - **Comprehensive Marking System**: Multiple ways to mark both visible and shadowbanned comments
 - **Custom Functions**: Write your own JavaScript to style comments exactly how you want
 - **Dark Mode Compatible**: Designed to work seamlessly with 9gag's dark theme
-- **No Emojis**: Clean, professional appearance following 9gag's design principles
 - **Real-time Updates**: Automatically processes new comments as they load
 - **Cross-browser Support**: Works on both Firefox and Chrome-based browsers
 
